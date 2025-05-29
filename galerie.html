@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lah-nayah - Galerie</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Styles spécifiques à la galerie */
+        .gallery-section {
+            margin: 2rem 0;
+        }
+        
+        .gallery-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #e74c3c;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+        
+        .gallery-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .gallery-column {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .gallery-header {
+            background-color: #e74c3c;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            min-height: 500px;
+        }
+        
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+            aspect-ratio: 4/3;
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+            gap: 0.5rem;
+        }
+        
+        .pagination button {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        
+        .pagination button.active {
+            background-color: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+        
+        .no-photos {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 2rem;
+            color: #777;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Lah-nayah</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Accueil</a></li>
+                    <li><a href="mission.html">Notre Mission</a></li>
+                    <li><a href="don.html">Faire un Don</a></li>
+                    <li><a href="galerie.html" class="active">Galerie</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="gallery-section">
+            <h2 class="gallery-title">Évolution du projet en images</h2>
+            
+            <div class="gallery-container">
+                <!-- Colonne AVANT -->
+                <div class="gallery-column">
+                    <h3 class="gallery-header">AVANT LES TRAVAUX</h3>
+                    <div class="gallery-grid" id="avant-grid">
+                        <!-- Les photos seront chargées ici par JavaScript -->
+                        <div class="no-photos">Chargement des photos...</div>
+                    </div>
+                    <div class="pagination" id="avant-pagination"></div>
+                </div>
+                
+                <!-- Colonne APRÈS -->
+                <div class="gallery-column">
+                    <h3 class="gallery-header" style="background-color: #2ecc71;">APRÈS LES TRAVAUX</h3>
+                    <div class="gallery-grid" id="apres-grid">
+                        <!-- Les photos seront chargées ici par JavaScript -->
+                        <div class="no-photos">Chargement des photos...</div>
+                    </div>
+                    <div class="pagination" id="apres-pagination"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Lah-nayah - Tous droits réservés</p>
+        </div>
+    </footer>
+
+    <script>
+        // Configuration
+        const photosPerPage = 8; // Nombre de photos par page
+        const totalAvantPhotos = 45; // Remplacez par le nombre réel de photos "avant"
+        const totalApresPhotos = 38; // Remplacez par le nombre réel de photos "après"
+        
+        // Fonction pour générer les éléments de pagination
+        function setupPagination(totalPhotos, prefix) {
+            const pageCount = Math.ceil(totalPhotos / photosPerPage);
+            const paginationDiv = document.getElementById(`${prefix}-pagination`);
+            
+            if (pageCount <= 1) return;
+            
+            for (let i = 1; i <= pageCount; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                if (i === 1) btn.classList.add('active');
+                
+                btn.addEventListener('click', () => {
+                    // Retirer la classe active de tous les boutons
+                    document.querySelectorAll(`#${prefix}-pagination button`).forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    
+                    // Ajouter la classe active au bouton cliqué
+                    btn.classList.add('active');
+                    
+                    // Charger les photos pour cette page
+                    loadPhotos(prefix, i);
+                });
+                
+                paginationDiv.appendChild(btn);
+            }
+        }
+        
+        // Fonction pour simuler le chargement des photos
+        function loadPhotos(prefix, page) {
+            const grid = document.getElementById(`${prefix}-grid`);
+            grid.innerHTML = '';
+            
+            const startIdx = (page - 1) * photosPerPage;
+            const endIdx = startIdx + photosPerPage;
+            
+            // Simuler un chargement depuis un dossier
+            for (let i = startIdx; i < endIdx; i++) {
+                // En production, remplacer par les vrais chemins d'images
+                const imgUrl = `images/${prefix}/photo${i+1}.jpg`;
+                
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.innerHTML = `<img src="${imgUrl}" alt="${prefix} photo ${i+1}" loading="lazy">`;
+                grid.appendChild(item);
+            }
+        }
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            // Configurer la pagination
+            setupPagination(totalAvantPhotos, 'avant');
+            setupPagination(totalApresPhotos, 'apres');
+            
+            // Charger la première page
+            loadPhotos('avant', 1);
+            loadPhotos('apres', 1);
+        });
+    </script>
+</body>
+</html>

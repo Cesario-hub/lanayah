@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lah-nayah - Galerie</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Styles spécifiques à la galerie */
+        .gallery-section {
+            margin: 2rem 0;
+        }
+        
+        .gallery-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #e74c3c;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+        
+        .gallery-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .gallery-column {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .gallery-header {
+            background-color: #e74c3c;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            min-height: 500px;
+        }
+        
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+            aspect-ratio: 4/3;
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+            gap: 0.5rem;
+        }
+        
+        .pagination button {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        
+        .pagination button.active {
+            background-color: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+        
+        .no-photos {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 2rem;
+            color: #777;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Lah-nayah</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Accueil</a></li>
+                    <li><a href="mission.html">Notre Mission</a></li>
+                    <li><a href="don.html">Faire un Don</a></li>
+                    <li><a href="galerie.html" class="active">Galerie</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="gallery-section">
+            <h2 class="gallery-title">Évolution du projet en images</h2>
+            
+            <div class="gallery-container">
+                <!-- Colonne AVANT -->
+                <div class="gallery-column">
+                    <h3 class="gallery-header">AVANT LES TRAVAUX</h3>
+                    <div class="gallery-grid" id="avant-grid">
+                        <div class="no-photos">Chargement des photos...</div>
+                    </div>
+                    <div class="pagination" id="avant-pagination"></div>
+                </div>
+                
+                <!-- Colonne APRÈS -->
+                <div class="gallery-column">
+                    <h3 class="gallery-header" style="background-color: #2ecc71;">APRÈS LES TRAVAUX</h3>
+                    <div class="gallery-grid" id="apres-grid">
+                        <div class="no-photos">Chargement des photos...</div>
+                    </div>
+                    <div class="pagination" id="apres-pagination"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Lah-nayah - Tous droits réservés</p>
+        </div>
+    </footer>
+
+    <script>
+        // Configuration
+        const photosPerPage = 8;
+        
+        // Fonction pour vérifier si une image existe
+        async function imageExists(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = url;
+            });
+        }
+        
+        // Fonction pour charger les photos disponibles
+        async function loadAvailablePhotos(prefix) {
+            const availablePhotos = [];
+            let index = 1;
+            let foundPhotos = 0;
+            const maxAttempts = 100; // Limite pour éviter les boucles infinies
+            
+            while (foundPhotos < photosPerPage * 3 && index < maxAttempts) {
+                const imgUrl = `images/${prefix}/photo${index}.jpg`;
+                if (await imageExists(imgUrl)) {
+                    availablePhotos.push({
+                        url: imgUrl,
+                        alt: `${prefix} photo ${index}`
+                    });
+                    foundPhotos++;
+                }
+                index++;
+            }
+            
+            return availablePhotos;
+        }
+        
+        // Fonction pour générer la pagination
+        function setupPagination(availablePhotos, prefix) {
+            const pageCount = Math.ceil(availablePhotos.length / photosPerPage);
+            const paginationDiv = document.getElementById(`${prefix}-pagination`);
+            paginationDiv.innerHTML = '';
+            
+            if (pageCount <= 1) return;
+            
+            for (let i = 1; i <= pageCount; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                if (i === 1) btn.classList.add('active');
+                
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll(`#${prefix}-pagination button`).forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    btn.classList.add('active');
+                    displayPhotos(availablePhotos, prefix, i);
+                });
+                
+                paginationDiv.appendChild(btn);
+            }
+        }
+        
+        // Fonction pour afficher les photos
+        function displayPhotos(photos, prefix, page) {
+            const grid = document.getElementById(`${prefix}-grid`);
+            grid.innerHTML = '';
+            
+            if (photos.length === 0) {
+                grid.innerHTML = '<div class="no-photos">Aucune photo disponible</div>';
+                return;
+            }
+            
+            const startIdx = (page - 1) * photosPerPage;
+            const endIdx = Math.min(startIdx + photosPerPage, photos.length);
+            
+            for (let i = startIdx; i < endIdx; i++) {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.innerHTML = `<img src="${photos[i].url}" alt="${photos[i].alt}" loading="lazy">`;
+                grid.appendChild(item);
+            }
+        }
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Charger les photos disponibles
+                const avantPhotos = await loadAvailablePhotos('avant');
+                const apresPhotos = await loadAvailablePhotos('apres');
+                
+                // Configurer la pagination
+                setupPagination(avantPhotos, 'avant');
+                setupPagination(apresPhotos, 'apres');
+                
+                // Afficher les premières photos
+                displayPhotos(avantPhotos, 'avant', 1);
+                displayPhotos(apresPhotos, 'apres', 1);
+                
+            } catch (error) {
+                console.error('Erreur lors du chargement des photos:', error);
+                document.getElementById('avant-grid').innerHTML = '<div class="no-photos">Erreur de chargement des photos</div>';
+                document.getElementById('apres-grid').innerHTML = '<div class="no-photos">Erreur de chargement des photos</div>';
+            }
+        });
+    </script>
+</body>
+</html>

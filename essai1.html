@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lah-nayah - Galerie</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Styles spécifiques à la galerie */
+        .gallery-section {
+            margin: 2rem 0;
+        }
+        
+        .gallery-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #e74c3c;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+        
+        .gallery-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .gallery-column {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .gallery-header {
+            background-color: #e74c3c;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            min-height: 500px;
+        }
+        
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+            aspect-ratio: 4/3;
+            cursor: pointer;
+        }
+        
+        .gallery-item:hover {
+            transform: scale(1.02);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        /* Lightbox Styles */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .lightbox.active {
+            display: flex;
+        }
+        
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+        }
+        
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 5px;
+        }
+        
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+        
+        .lightbox-nav {
+            position: absolute;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        
+        .lightbox-nav button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 10px;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+            gap: 0.5rem;
+        }
+        
+        .pagination button {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        
+        .pagination button.active {
+            background-color: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+        
+        .no-photos {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 2rem;
+            color: #777;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .lightbox-content {
+                max-width: 95%;
+            }
+            
+            .lightbox-close {
+                top: 10px;
+                right: 15px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Lah-nayah</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Accueil</a></li>
+                    <li><a href="mission.html">Notre Mission</a></li>
+                    <li><a href="don.html">Faire un Don</a></li>
+                    <li><a href="galerie.html" class="active">Galerie</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="gallery-section">
+            <h2 class="gallery-title">Évolution du projet en images</h2>
+            
+            <div class="gallery-container">
+                <!-- Colonne AVANT -->
+                <div class="gallery-column">
+                    <h3 class="gallery-header">AVANT LES TRAVAUX</h3>
+                    <div class="gallery-grid" id="avant-grid">
+                        <div class="no-photos">Chargement des photos...</div>
+                    </div>
+                    <div class="pagination" id="avant-pagination"></div>
+                </div>
+                
+                <!-- Colonne APRÈS -->
+                <div class="gallery-column">
+                    <h3 class="gallery-header" style="background-color: #2ecc71;">APRÈS LES TRAVAUX</h3>
+                    <div class="gallery-grid" id="apres-grid">
+                        <div class="no-photos">Chargement des photos...</div>
+                    </div>
+                    <div class="pagination" id="apres-pagination"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Lightbox HTML -->
+    <div class="lightbox" id="lightbox">
+        <span class="lightbox-close" id="lightboxClose">&times;</span>
+        <div class="lightbox-nav">
+            <button id="lightboxPrev">&lt;</button>
+            <button id="lightboxNext">&gt;</button>
+        </div>
+        <div class="lightbox-content">
+            <img id="lightboxImage" src="" alt="">
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Lah-nayah - Tous droits réservés</p>
+        </div>
+    </footer>
+
+    <script>
+        // Configuration
+        const photosPerPage = 8;
+        let currentPhotos = [];
+        let currentIndex = 0;
+        
+        // Lightbox elements
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImage = document.getElementById('lightboxImage');
+        const lightboxClose = document.getElementById('lightboxClose');
+        const lightboxPrev = document.getElementById('lightboxPrev');
+        const lightboxNext = document.getElementById('lightboxNext');
+        
+        // Fonction pour vérifier si une image existe
+        async function imageExists(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = url;
+            });
+        }
+        
+        // Fonction pour charger les photos disponibles
+        async function loadAvailablePhotos(prefix) {
+            const availablePhotos = [];
+            let index = 1;
+            let foundPhotos = 0;
+            const maxAttempts = 100;
+            
+            while (foundPhotos < photosPerPage * 3 && index < maxAttempts) {
+                const imgUrl = `images/${prefix}/photo${index}.jpg`;
+                if (await imageExists(imgUrl)) {
+                    availablePhotos.push({
+                        url: imgUrl,
+                        alt: `${prefix} photo ${index}`
+                    });
+                    foundPhotos++;
+                }
+                index++;
+            }
+            
+            return availablePhotos;
+        }
+        
+        // Fonction pour générer la pagination
+        function setupPagination(availablePhotos, prefix) {
+            const pageCount = Math.ceil(availablePhotos.length / photosPerPage);
+            const paginationDiv = document.getElementById(`${prefix}-pagination`);
+            paginationDiv.innerHTML = '';
+            
+            if (pageCount <= 1) return;
+            
+            for (let i = 1; i <= pageCount; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                if (i === 1) btn.classList.add('active');
+                
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll(`#${prefix}-pagination button`).forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    btn.classList.add('active');
+                    displayPhotos(availablePhotos, prefix, i);
+                });
+                
+                paginationDiv.appendChild(btn);
+            }
+        }
+        
+        // Fonction pour afficher les photos
+        function displayPhotos(photos, prefix, page) {
+            const grid = document.getElementById(`${prefix}-grid`);
+            grid.innerHTML = '';
+            
+            if (photos.length === 0) {
+                grid.innerHTML = '<div class="no-photos">Aucune photo disponible</div>';
+                return;
+            }
+            
+            const startIdx = (page - 1) * photosPerPage;
+            const endIdx = Math.min(startIdx + photosPerPage, photos.length);
+            
+            for (let i = startIdx; i < endIdx; i++) {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.innerHTML = `<img src="${photos[i].url}" alt="${photos[i].alt}" loading="lazy">`;
+                
+                // Add click event to open lightbox
+                item.addEventListener('click', () => {
+                    openLightbox(photos, i - startIdx);
+                });
+                
+                grid.appendChild(item);
+            }
+        }
+        
+        // Lightbox functions
+        function openLightbox(photos, index) {
+            currentPhotos = photos;
+            currentIndex = index;
+            lightboxImage.src = photos[index].url;
+            lightboxImage.alt = photos[index].alt;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+        }
+        
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        function navigateLightbox(direction) {
+            currentIndex += direction;
+            
+            if (currentIndex >= currentPhotos.length) {
+                currentIndex = 0;
+            } else if (currentIndex < 0) {
+                currentIndex = currentPhotos.length - 1;
+            }
+            
+            lightboxImage.src = currentPhotos[currentIndex].url;
+            lightboxImage.alt = currentPhotos[currentIndex].alt;
+        }
+        
+        // Event listeners for lightbox
+        lightboxClose.addEventListener('click', closeLightbox);
+        lightboxPrev.addEventListener('click', () => navigateLightbox(-1));
+        lightboxNext.addEventListener('click', () => navigateLightbox(1));
+        
+        // Close lightbox when clicking on the background
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                closeLightbox();
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (lightbox.classList.contains('active')) {
+                if (e.key === 'Escape') {
+                    closeLightbox();
+                } else if (e.key === 'ArrowLeft') {
+                    navigateLightbox(-1);
+                } else if (e.key === 'ArrowRight') {
+                    navigateLightbox(1);
+                }
+            }
+        });
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Charger les photos disponibles
+                const avantPhotos = await loadAvailablePhotos('avant');
+                const apresPhotos = await loadAvailablePhotos('apres');
+                
+                // Configurer la pagination
+                setupPagination(avantPhotos, 'avant');
+                setupPagination(apresPhotos, 'apres');
+                
+                // Afficher les premières photos
+                displayPhotos(avantPhotos, 'avant', 1);
+                displayPhotos(apresPhotos, 'apres', 1);
+                
+            } catch (error) {
+                console.error('Erreur lors du chargement des photos:', error);
+                document.getElementById('avant-grid').innerHTML = '<div class="no-photos">Erreur de chargement des photos</div>';
+                document.getElementById('apres-grid').innerHTML = '<div class="no-photos">Erreur de chargement des photos</div>';
+            }
+        });
+    </script>
+</body>
+</html>
